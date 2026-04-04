@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>English Adjective Quiz</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f5f4f0;color:#1a1a18;min-height:100vh}
+  .screen{display:none;padding:1.5rem 1rem;min-height:100vh}
+  .screen.active{display:block}
+  .card{background:#fff;border:1px solid #e0dfd7;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+  .btn{display:inline-block;padding:10px 22px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#1a1a18;font-size:14px;cursor:pointer;transition:background 0.15s}
+  .btn:hover{background:#f0ede8}
+  .btn.primary{background:#1D9E75;color:#fff;border-color:#1D9E75}
+  .btn.primary:hover{background:#0F6E56}
+  input[type=text],input[type=password]{width:100%;padding:10px 14px;border:1px solid #ccc;border-radius:8px;font-size:15px;background:#fff;color:#1a1a18;margin-bottom:0.75rem}
+  input:focus{outline:2px solid #1D9E75;outline-offset:1px}
+  .tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600}
+  .tag-green{background:#EAF3DE;color:#27500A}
+  .tag-amber{background:#FAEEDA;color:#633806}
+  .tag-red{background:#FCEBEB;color:#791F1F}
+  .tag-blue{background:#E6F1FB;color:#0C447C}
+  .tag-purple{background:#EEEDFE;color:#26215C}
+  .progress-bar{height:7px;background:#e8e6e0;border-radius:4px;margin:8px 0}
+  .progress-fill{height:7px;background:#1D9E75;border-radius:4px;transition:width 0.4s}
+  .option-btn{display:block;width:100%;text-align:left;padding:12px 16px;margin:6px 0;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a18;font-size:14px;cursor:pointer;transition:all 0.15s}
+  .option-btn:hover:not(:disabled){background:#f5f4f0}
+  .option-btn.correct{background:#EAF3DE;border-color:#639922;color:#27500A}
+  .option-btn.wrong{background:#FCEBEB;border-color:#A32D2D;color:#791F1F}
+  .rule-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eee}
+  .rule-row:last-child{border-bottom:none}
+  .meter{height:8px;background:#eee;border-radius:4px;overflow:hidden;width:100px}
+  .meter-fill{height:8px;border-radius:4px;transition:width 0.5s}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:8px 10px;border-bottom:1px solid #ddd;color:#666;font-weight:600}
+  td{padding:7px 10px;border-bottom:1px solid #eee;color:#1a1a18}
+  .lp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  .nav-tabs{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+  .tab{padding:7px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#666}
+  .tab.active{background:#f0ede8;color:#1a1a18;font-weight:600}
+  .setup-step{background:#fff;border:1px solid #e0dfd7;border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+  .setup-step h3{font-size:15px;font-weight:600;margin-bottom:0.5rem}
+  .setup-step p{font-size:13px;color:#555;line-height:1.6}
+  code{background:#f0ede8;padding:2px 6px;border-radius:4px;font-size:12px;font-family:monospace}
+  .info-box{background:#E6F1FB;border:1px solid #B5D4F4;border-radius:8px;padding:12px 14px;font-size:13px;color:#0C447C;margin-bottom:1rem;line-height:1.6}
+  .warn-box{background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:12px 14px;font-size:13px;color:#633806;margin-bottom:1rem;line-height:1.6}
+  @media(max-width:600px){.rule-row{flex-direction:column;align-items:flex-start;gap:6px}}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN (shown when Supabase not configured) -->
+<div id="s-setup" class="screen active">
+  <div style="max-width:600px;margin:2rem auto">
+    <p style="font-size:22px;font-weight:600;margin-bottom:0.25rem">English Adjective Quiz</p>
+    <p style="color:#666;font-size:14px;margin-bottom:1.5rem">One-time setup — only you as teacher needs to do this!</p>
+
+    <div class="info-box">
+      This app uses <strong>Supabase</strong> as a free database so results are saved online and accessible from any device. Follow the steps below — takes about 10 minutes.
+    </div>
+
+    <div class="setup-step">
+      <h3>Step 1 — Create a free Supabase account</h3>
+      <p>Go to <a href="https://supabase.com" target="_blank" style="color:#1D9E75">supabase.com</a> and click <strong>Start your project</strong>. Sign up with your Microsoft account (or email).</p>
+    </div>
+
+    <div class="setup-step">
+      <h3>Step 2 — Create a new project</h3>
+      <p>Click <strong>New project</strong>. Give it a name (e.g. <code>adjective-quiz</code>). Choose a region close to Switzerland (e.g. <em>Frankfurt</em>). Set a database password — save it somewhere safe. Click <strong>Create new project</strong> and wait ~1 minute.</p>
+    </div>
+
+    <div class="setup-step">
+      <h3>Step 3 — Create the results table</h3>
+      <p>In your Supabase project, click <strong>SQL Editor</strong> in the left menu. Paste this SQL and click <strong>Run</strong>:</p>
+      <pre style="background:#f0ede8;padding:12px;border-radius:8px;font-size:12px;overflow-x:auto;margin-top:8px;line-height:1.6">CREATE TABLE quiz_results (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_name text NOT NULL,
+  score_pct integer NOT NULL,
+  questions_answered integer NOT NULL,
+  rule_stats jsonb NOT NULL,
+  completed_at timestamp with time zone DEFAULT now()
+);
+
+ALTER TABLE quiz_results ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow insert for all"
+  ON quiz_results FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Allow select for all"
+  ON quiz_results FOR SELECT
+  USING (true);</pre>
+    </div>
+
+    <div class="setup-step">
+      <h3>Step 4 — Get your API keys</h3>
+      <p>In your Supabase project, go to <strong>Project Settings → API</strong>. Copy the <strong>Project URL</strong> and the <strong>anon public</strong> key. Paste them below:</p>
+      <div style="margin-top:1rem">
+        <label style="font-size:13px;color:#555;display:block;margin-bottom:4px">Supabase Project URL</label>
+        <input type="text" id="setup-url" placeholder="https://xxxxxxxxxxxx.supabase.co"/>
+        <label style="font-size:13px;color:#555;display:block;margin-bottom:4px">Supabase Anon Key</label>
+        <input type="text" id="setup-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."/>
+        <button class="btn primary" onclick="saveSetup()" style="width:100%;margin-top:0.5rem">Save and start the quiz</button>
+        <p id="setup-err" style="color:#E24B4A;font-size:13px;margin-top:0.5rem;display:none"></p>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      After setup, the quiz will work for all students. You only need to do this once. To share the quiz with students, host the <code>index.html</code> file on GitHub Pages (see the included instructions PDF).
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="s-login" class="screen">
+  <div style="max-width:400px;margin:2rem auto">
+    <p style="font-size:22px;font-weight:600;color:#1a1a18;margin-bottom:0.25rem">English Adjective Quiz</p>
+    <p style="color:#666;font-size:14px;margin-bottom:1.5rem">Positive · Comparative · Superlative</p>
+    <div class="card">
+      <label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Your name</label>
+      <input type="text" id="student-name" placeholder="e.g. Anna Müller"/>
+      <button class="btn primary" onclick="startStudent()" style="width:100%">Start quiz</button>
+    </div>
+    <div style="text-align:center;margin-top:0.75rem">
+      <button class="btn" onclick="show('s-lp-login')" style="font-size:13px">Teacher view</button>
+    </div>
+  </div>
+</div>
+
+<!-- LP LOGIN -->
+<div id="s-lp-login" class="screen">
+  <div style="max-width:340px;margin:2rem auto">
+    <p style="font-size:18px;font-weight:600;margin-bottom:1rem">Teacher login</p>
+    <div class="card">
+      <label style="font-size:13px;color:#666;display:block;margin-bottom:4px">Password</label>
+      <input type="password" id="lp-pw" placeholder="••••••••"/>
+      <button class="btn primary" onclick="lpLogin()" style="width:100%">Login</button>
+      <p id="pw-err" style="color:#E24B4A;font-size:13px;margin-top:0.5rem;display:none">Wrong password</p>
+    </div>
+    <button class="btn" onclick="show('s-login')" style="margin-top:0.5rem">Back</button>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="s-quiz" class="screen">
+  <div style="max-width:580px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <p style="font-size:13px;color:#666" id="q-counter">Question 1 of 30</p>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="tag tag-purple" id="q-form-tag">Comparative</span>
+        <span class="tag tag-blue" id="q-rule-tag">Rule</span>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="q-progress" style="width:0%"></div></div>
+    <div class="card" style="margin-top:0.75rem">
+      <p style="font-size:13px;color:#666;margin-bottom:0.5rem" id="q-type-label">Choose the correct form</p>
+      <p style="font-size:17px;font-weight:600;color:#1a1a18;margin-bottom:1.25rem;line-height:1.5" id="q-text">Loading...</p>
+      <div id="q-options"></div>
+      <div id="q-feedback" style="display:none;margin-top:1rem;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.6"></div>
+      <button class="btn primary" id="q-next" style="display:none;margin-top:1rem" onclick="nextQ()">Next</button>
+    </div>
+    <p style="font-size:13px;color:#666;margin-top:0.25rem">Score: <span id="q-score">0</span> correct &nbsp;|&nbsp; <span id="q-name-tag" style="font-weight:600"></span></p>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="s-result" class="screen">
+  <div style="max-width:580px;margin:0 auto">
+    <p style="font-size:22px;font-weight:600;margin-bottom:0.25rem">Your results</p>
+    <p style="color:#666;font-size:14px;margin-bottom:1.25rem" id="res-name"></p>
+    <div class="card">
+      <p style="font-weight:600;font-size:15px;margin-bottom:1rem">Performance by rule</p>
+      <div id="rule-breakdown"></div>
+    </div>
+    <div class="card">
+      <p style="font-weight:600;font-size:15px;margin-bottom:0.75rem">What to practise next</p>
+      <div id="practice-tips"></div>
+    </div>
+    <button class="btn primary" onclick="restartStudent()">Practice again</button>
+    <button class="btn" onclick="show('s-login')" style="margin-left:8px">New student</button>
+  </div>
+</div>
+
+<!-- TEACHER DASHBOARD -->
+<div id="s-lp" class="screen">
+  <div style="max-width:780px;margin:0 auto">
+    <div class="lp-header">
+      <p style="font-size:20px;font-weight:600">Teacher dashboard</p>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn" onclick="loadLP()" style="font-size:13px">Refresh</button>
+        <button class="btn" onclick="show('s-login')" style="font-size:13px">Logout</button>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab active" onclick="lpTab('overview',this)">Overview</button>
+      <button class="tab" onclick="lpTab('students',this)">Students</button>
+      <button class="tab" onclick="lpTab('rules',this)">Rules analysis</button>
+    </div>
+    <div id="lp-overview" class="lp-panel">
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:1rem">
+        <div style="background:#f5f4f0;border-radius:8px;padding:1rem">
+          <p style="font-size:12px;color:#666">Students tested</p>
+          <p style="font-size:24px;font-weight:600" id="lp-total-students">–</p>
+        </div>
+        <div style="background:#f5f4f0;border-radius:8px;padding:1rem">
+          <p style="font-size:12px;color:#666">Avg. best score</p>
+          <p style="font-size:24px;font-weight:600" id="lp-avg-score">–</p>
+        </div>
+        <div style="background:#f5f4f0;border-radius:8px;padding:1rem">
+          <p style="font-size:12px;color:#666">Most difficult rule</p>
+          <p style="font-size:13px;font-weight:600;color:#E24B4A" id="lp-hard-rule">–</p>
+        </div>
+      </div>
+      <div class="card">
+        <p style="font-weight:600;font-size:14px;margin-bottom:1rem">Class rule overview</p>
+        <div id="lp-class-rules"><p style="color:#666;font-size:14px">Loading...</p></div>
+      </div>
+    </div>
+    <div id="lp-students" class="lp-panel" style="display:none">
+      <div class="card" style="overflow-x:auto">
+        <table><thead><tr><th>Name</th><th>Attempts</th><th>Best score</th><th>Last attempt</th><th>Weakest rule</th><th>Status</th></tr></thead>
+        <tbody id="lp-tbody"></tbody></table>
+        <p id="lp-no-data" style="color:#666;font-size:14px;padding:1rem 0;display:none">No students yet.</p>
+      </div>
+    </div>
+    <div id="lp-rules" class="lp-panel" style="display:none">
+      <div class="card"><p style="font-weight:600;font-size:14px;margin-bottom:1rem">Rule-by-rule class performance</p>
+      <div id="lp-rules-detail"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SUPABASE CONFIG ───────────────────────────────────────────────
+const SB_URL = 'https://tesgkgraopyrnwrvlqhz.supabase.co';
+const SB_KEY = 'sb_publishable_LWaEHtXEBUj22yum2TArqg_osNzj4q4';
+let supabase = null;
+
+function initSupabase(url, key) {
+  supabase = window.supabase.createClient(url, key);
+}
+
+// ─── RULES & QUESTIONS ────────────────────────────────────────────
+const RULES = {
+  "pos-use": {
+    label: "Positive form: when to use it",
+    hint: "Use the positive (base) form to describe something without comparison: 'She is tall.' No -er/more needed!",
+    ex: ["She is tall (not: She is taller)", "The film is boring (not comparing → no 'more')", "He is a good student"]
+  },
+  "pos-as-as": {
+    label: "Positive: as … as (equal comparison)",
+    hint: "Use 'as + adjective + as' to say two things are equal: 'He is as tall as his brother.' Negation: 'not as tall as'.",
+    ex: ["She is as fast as her sister", "This is not as expensive as that one", "Is he as good as last year?"]
+  },
+  "1-syl-regular": {
+    label: "1 syllable regular (tall → taller → tallest)",
+    hint: "Add -er (comparative) and -est (superlative) to 1-syllable adjectives.",
+    ex: ["tall → taller → tallest", "old → older → oldest", "smart → smarter → smartest"]
+  },
+  "1-syl-cvc": {
+    label: "1-syllable CVC: double consonant (big → bigger)",
+    hint: "If a 1-syllable adjective ends in consonant-vowel-consonant (CVC), double the final consonant before -er/-est.",
+    ex: ["big → bigger → biggest", "hot → hotter → hottest", "thin → thinner → thinnest"]
+  },
+  "1-syl-e": {
+    label: "1-syllable ending in -e (nice → nicer → nicest)",
+    hint: "If the adjective already ends in -e, just add -r / -st.",
+    ex: ["nice → nicer → nicest", "brave → braver → bravest", "large → larger → largest"]
+  },
+  "2-syl-y": {
+    label: "2 syllables ending in -y (happy → happier → happiest)",
+    hint: "Change -y to -i, then add -er / -est.",
+    ex: ["happy → happier → happiest", "easy → easier → easiest", "funny → funnier → funniest"]
+  },
+  "2-syl-more": {
+    label: "2 syllables with more/most (careful → more careful)",
+    hint: "Most 2-syllable adjectives NOT ending in -y use 'more/most'. This includes adjectives ending in -ful, -less, -ing, -ed, -ous, -ish, -al, -ive, and most others.",
+    ex: ["careful → more careful → most careful", "famous → more famous → most famous", "active → more active → most active", "useful → more useful → most useful"]
+  },
+  "2-syl-both": {
+    label: "2 syllables: both forms possible (clever, quiet, simple…)",
+    hint: "A few common 2-syllable adjectives can use EITHER -er/-est OR more/most. Both are correct! These include: clever, quiet, simple, gentle, narrow, shallow, common, handsome, polite.",
+    ex: ["clever → cleverer / more clever", "quiet → quieter / more quiet", "simple → simpler / more simple", "gentle → gentler / more gentle"]
+  },
+  "multi": {
+    label: "3+ syllables always use more/most",
+    hint: "Adjectives with 3 or more syllables ALWAYS use 'more' and 'most'. Never add -er/-est.",
+    ex: ["beautiful → more beautiful → most beautiful", "interesting → more interesting → most interesting", "expensive → more expensive → most expensive"]
+  },
+  "irreg-good-bad": {
+    label: "Irregular: good / bad",
+    hint: "good → better → best  |  bad → worse → worst — completely irregular, must be memorised!",
+    ex: ["good → better → best", "bad → worse → worst", "This is good → That is better → That is the best"]
+  },
+  "irreg-far": {
+    label: "Irregular: far → further/farther → furthest/farthest",
+    hint: "'far' has two forms. 'Further/furthest' is more common in British English and can also mean 'additional'. 'Farther/farthest' refers strictly to physical distance.",
+    ex: ["far → further → furthest (most common)", "far → farther → farthest (distance only)", "We need to discuss this further (= additionally)"]
+  },
+  "irreg-few-little": {
+    label: "Irregular: few / little → fewer/less → fewest/least",
+    hint: "'few' (countable nouns) → fewer → fewest  |  'little' (uncountable nouns) → less → least. Don't confuse them: 'fewer mistakes' (countable) vs. 'less money' (uncountable).",
+    ex: ["few → fewer → fewest (countable: mistakes, people, cars)", "little → less → least (uncountable: money, water, time)", "'fewer friends' but 'less time'"]
+  }
+};
+
+const ALL_Q = [
+  {r:"pos-use",form:"Positive",q:"Which sentence uses the adjective correctly in the positive form?",opts:["She is more tall than her friend.","She is tall.","She is the tallest.","She is as more tall."],a:1},
+  {r:"pos-use",form:"Positive",q:"'This exercise is ___.' Fill in the positive form of 'difficult'.",opts:["more difficult","most difficult","difficult","difficulter"],a:2},
+  {r:"pos-use",form:"Positive",q:"Which is a correct positive form sentence?",opts:["He is gooder than before.","He is a good student.","He is more good.","He is the most good."],a:1},
+  {r:"pos-use",form:"Positive",q:"'The weather is ___ today.' (warm) — positive form only",opts:["warmer","warmest","more warm","warm"],a:3},
+  {r:"pos-as-as",form:"Positive",q:"Complete: 'She is ___ her sister.' (tall) — they are equally tall",opts:["as tall as","taller than","the tallest as","so tall than"],a:0},
+  {r:"pos-as-as",form:"Positive",q:"'This film is ___ that one.' (boring) — they are equally boring",opts:["more boring than","as boring as","the most boring","boring than"],a:1},
+  {r:"pos-as-as",form:"Positive",q:"'He is ___ fast ___ a cheetah.' — equal comparison",opts:["more / than","as / as","so / that","the most / of"],a:1},
+  {r:"pos-as-as",form:"Positive",q:"Which sentence expresses equality correctly?",opts:["She is not as tall than her brother.","She is not as tall as her brother.","She is not taller as her brother.","She is not so tall than her brother."],a:1},
+  {r:"pos-as-as",form:"Positive",q:"'London is ___ expensive ___ Zürich.' (equally expensive)",opts:["so / that","as / as","more / than","much / as"],a:1},
+  {r:"1-syl-regular",form:"Comparative",q:"What is the comparative of 'tall'?",opts:["more tall","taller","tallest","most tall"],a:1},
+  {r:"1-syl-regular",form:"Comparative",q:"'This road is ___ than the other one.' (long)",opts:["more long","longer","most long","longest"],a:1},
+  {r:"1-syl-regular",form:"Superlative",q:"What is the superlative of 'old'?",opts:["more old","oldest","most old","elder"],a:1},
+  {r:"1-syl-regular",form:"Superlative",q:"'She is the ___ student in the class.' (smart)",opts:["smarter","more smart","smartest","most smart"],a:2},
+  {r:"1-syl-regular",form:"Comparative",q:"'Mount Everest is ___ than Mont Blanc.' (high)",opts:["more high","highly","higher","highest"],a:2},
+  {r:"1-syl-cvc",form:"Comparative",q:"What is the comparative of 'big'?",opts:["biger","more big","bigger","most big"],a:2},
+  {r:"1-syl-cvc",form:"Comparative",q:"'Today is ___ than yesterday.' (hot)",opts:["hoter","hotter","more hot","most hot"],a:1},
+  {r:"1-syl-cvc",form:"Superlative",q:"What is the superlative of 'thin'?",opts:["thinest","thinnest","most thin","more thin"],a:1},
+  {r:"1-syl-cvc",form:"Superlative",q:"'He is the ___ person I know.' (fit)",opts:["fittest","fiting","most fit","more fit"],a:0},
+  {r:"1-syl-cvc",form:"Comparative",q:"'She runs ___ than her teammate.' (fast)",opts:["more fast","faster","fastest","most fast"],a:1},
+  {r:"1-syl-e",form:"Comparative",q:"What is the comparative of 'nice'?",opts:["nicer","niceer","more nice","niceier"],a:0},
+  {r:"1-syl-e",form:"Superlative",q:"What is the superlative of 'brave'?",opts:["bravest","braviest","most brave","more brave"],a:0},
+  {r:"1-syl-e",form:"Comparative",q:"'This path is ___ than the other.' (large)",opts:["largeer","larger","more large","most large"],a:1},
+  {r:"2-syl-y",form:"Comparative",q:"What is the comparative of 'happy'?",opts:["happyer","more happy","happier","most happy"],a:2},
+  {r:"2-syl-y",form:"Superlative",q:"What is the superlative of 'easy'?",opts:["easiest","most easy","easyest","more easy"],a:0},
+  {r:"2-syl-y",form:"Comparative",q:"'This exercise is ___ than the last.' (funny)",opts:["funnier","more funny","funnyer","most funny"],a:0},
+  {r:"2-syl-y",form:"Comparative",q:"What is the comparative of 'dirty'?",opts:["dirtier","more dirty","dirtyier","most dirty"],a:0},
+  {r:"2-syl-y",form:"Superlative",q:"What is the superlative of 'friendly'?",opts:["friendliest","most friendly","friendlyest","more friendly"],a:0},
+  {r:"2-syl-y",form:"Comparative",q:"'She is ___ than her brother at maths.' (lucky)",opts:["more lucky","luckier","luckyer","most lucky"],a:1},
+  {r:"2-syl-more",form:"Comparative",q:"What is the comparative of 'careful'?",opts:["carefullier","carefuler","more careful","carefullest"],a:2},
+  {r:"2-syl-more",form:"Superlative",q:"What is the superlative of 'famous'?",opts:["famouser","most famous","more famous","famousest"],a:1},
+  {r:"2-syl-more",form:"Comparative",q:"'This machine is ___ than the old one.' (useful)",opts:["usefuler","more useful","usefullier","most useful"],a:1},
+  {r:"2-syl-more",form:"Comparative",q:"What is the comparative of 'active'?",opts:["activer","more active","activeer","most active"],a:1},
+  {r:"2-syl-more",form:"Superlative",q:"'He is the ___ person I know.' (modern)",opts:["modernest","more modern","most modern","moderner"],a:2},
+  {r:"2-syl-both",form:"Comparative",q:"'She is ___ than her classmates.' (clever) — pick a correct form",opts:["more cleverer","cleverer","cleverier","most clever"],a:1},
+  {r:"2-syl-both",form:"Comparative",q:"Which comparative of 'quiet' is correct?",opts:["more quieter","quietier","more quiet","quietest"],a:2},
+  {r:"2-syl-both",form:"Superlative",q:"'This is the ___ solution.' (simple) — which is correct?",opts:["most simplest","more simple","simplest","simpleliest"],a:2},
+  {r:"2-syl-both",form:"Comparative",q:"'He is ___ than he looks.' (gentle) — pick a correct form",opts:["gentlier","more gentler","gentler","most gentle"],a:2},
+  {r:"multi",form:"Comparative",q:"What is the comparative of 'beautiful'?",opts:["beautifuler","more beautiful","beautifuller","beautifuler"],a:1},
+  {r:"multi",form:"Superlative",q:"What is the superlative of 'interesting'?",opts:["interestingest","most interesting","more interesting","interestingst"],a:1},
+  {r:"multi",form:"Superlative",q:"'That was the ___ film I have ever seen.' (boring)",opts:["most boring","boringest","more boring","boringly"],a:0},
+  {r:"multi",form:"Comparative",q:"'This phone is ___ than mine.' (expensive)",opts:["expensiver","expensivest","more expensive","most expensive"],a:2},
+  {r:"multi",form:"Superlative",q:"What is the superlative of 'dangerous'?",opts:["dangerouser","most dangerous","more dangerous","dangerousest"],a:1},
+  {r:"irreg-good-bad",form:"Comparative",q:"What is the comparative of 'good'?",opts:["gooder","more good","better","weller"],a:2},
+  {r:"irreg-good-bad",form:"Superlative",q:"What is the superlative of 'bad'?",opts:["baddest","worst","worser","most bad"],a:1},
+  {r:"irreg-good-bad",form:"Superlative",q:"What is the superlative of 'good'?",opts:["goodest","most good","better","best"],a:3},
+  {r:"irreg-good-bad",form:"Comparative",q:"What is the comparative of 'bad'?",opts:["badder","most bad","worse","more bad"],a:2},
+  {r:"irreg-good-bad",form:"Comparative",q:"'Her singing is ___ than mine.' (good)",opts:["more good","gooder","better","best"],a:2},
+  {r:"irreg-far",form:"Comparative",q:"What is the most common comparative of 'far' in British English?",opts:["more far","farer","further","farrer"],a:2},
+  {r:"irreg-far",form:"Superlative",q:"What is the superlative of 'far' (physical distance)?",opts:["most far","farest","furthest","farrest"],a:2},
+  {r:"irreg-far",form:"Comparative",q:"'We need to discuss this ___.' (far — meaning 'additionally')",opts:["farther","farer","more far","further"],a:3},
+  {r:"irreg-few-little",form:"Comparative",q:"'I have ___ mistakes than yesterday.' (few — countable)",opts:["less","fewest","fewer","littler"],a:2},
+  {r:"irreg-few-little",form:"Comparative",q:"'She has ___ money than her brother.' (little — uncountable)",opts:["fewer","less","littler","least"],a:1},
+  {r:"irreg-few-little",form:"Superlative",q:"'He made the ___ errors in the test.' (few — countable)",opts:["least","fewest","fewer","less"],a:1},
+  {r:"irreg-few-little",form:"Superlative",q:"'She spent the ___ time on homework.' (little — uncountable)",opts:["fewest","fewer","less","least"],a:3},
+  {r:"irreg-few-little",form:"Comparative",q:"Which sentence is correct? (cars = countable)",opts:["There are less cars today.","There are fewer cars today.","There are littler cars today.","There are fewest cars today."],a:1},
+  {r:"irreg-few-little",form:"Comparative",q:"Which is correct? 'There is ___ water in this glass.'",opts:["fewer","fewest","less","littler"],a:2},
+  {r:"irreg-few-little",form:"Positive",q:"'She has very ___ patience.' (small amount, uncountable) — positive",opts:["few","fewer","less","little"],a:3},
+  {r:"irreg-few-little",form:"Positive",q:"'There are ___ students absent today.' (small number, countable) — positive",opts:["little","less","few","least"],a:2}
+];
+
+// ─── APP STATE ────────────────────────────────────────────────────
+let studentName = "", qPool = [], qIdx = 0, score = 0, ruleStats = {};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function initStats() {
+  ruleStats = {};
+  Object.keys(RULES).forEach(r => { ruleStats[r] = { correct: 0, total: 0 }; });
+}
+
+function buildPool() {
+  const byRule = {};
+  Object.keys(RULES).forEach(r => { byRule[r] = []; });
+  ALL_Q.forEach((q, i) => { if (byRule[q.r]) byRule[q.r].push(i); });
+  const perRule = Math.max(2, Math.floor(30 / Object.keys(RULES).length));
+  let pool = [];
+  Object.keys(RULES).forEach(r => {
+    const idxs = [...byRule[r]].sort(() => Math.random() - 0.5);
+    pool.push(...idxs.slice(0, perRule));
+  });
+  pool = pool.sort(() => Math.random() - 0.5).slice(0, 30);
+  return pool;
+}
+
+function startStudent() {
+  const n = document.getElementById('student-name').value.trim();
+  if (!n) { alert('Please enter your name.'); return; }
+  studentName = n;
+  document.getElementById('q-name-tag').textContent = n;
+  initStats(); qPool = buildPool(); qIdx = 0; score = 0;
+  show('s-quiz'); renderQ();
+}
+
+function renderQ() {
+  if (qIdx >= qPool.length) { showResult(); return; }
+  const q = ALL_Q[qPool[qIdx]];
+  const total = qPool.length;
+  document.getElementById('q-counter').textContent = `Question ${qIdx + 1} of ${total}`;
+  document.getElementById('q-progress').style.width = `${Math.round((qIdx / total) * 100)}%`;
+  document.getElementById('q-rule-tag').textContent = RULES[q.r].label.split('(')[0].trim().substring(0, 30);
+  document.getElementById('q-form-tag').textContent = q.form;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-next').style.display = 'none';
+  const opts = document.getElementById('q-options'); opts.innerHTML = '';
+  const shuffled = q.opts.map((o, i) => ({ o, i })).sort(() => Math.random() - 0.5);
+  shuffled.forEach(({ o, i }) => {
+    const b = document.createElement('button');
+    b.className = 'option-btn'; b.textContent = o;
+    b.onclick = () => checkAnswer(i === q.a, b, q, shuffled);
+    opts.appendChild(b);
+  });
+}
+
+function checkAnswer(correct, btn, q, shuffled) {
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('q-feedback');
+  ruleStats[q.r].total++;
+  if (correct) {
+    btn.classList.add('correct'); ruleStats[q.r].correct++; score++;
+    document.getElementById('q-score').textContent = score;
+    fb.style.cssText = 'background:#EAF3DE;color:#27500A;border:1px solid #639922;display:block;margin-top:1rem;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.6';
+    fb.innerHTML = `<strong>Correct!</strong><br>${RULES[q.r].hint}`;
+  } else {
+    btn.classList.add('wrong');
+    shuffled.forEach(({ o, i }) => { if (i === q.a) document.querySelectorAll('.option-btn').forEach(b => { if (b.textContent === o) b.classList.add('correct'); }); });
+    fb.style.cssText = 'background:#FCEBEB;color:#791F1F;border:1px solid #A32D2D;display:block;margin-top:1rem;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.6';
+    fb.innerHTML = `<strong>Not quite.</strong><br>${RULES[q.r].hint}<br><span style="font-size:12px;display:block;margin-top:4px">Examples: ${RULES[q.r].ex.join(' · ')}</span>`;
+    adaptPool(q.r);
+  }
+  document.getElementById('q-next').style.display = 'inline-block';
+}
+
+function adaptPool(rule) {
+  const used = new Set(qPool);
+  const extra = ALL_Q.map((q, i) => ({ q, i })).filter(({ q, i }) => q.r === rule && !used.has(i));
+  if (extra.length > 0 && qIdx < qPool.length - 1) {
+    const pick = extra[Math.floor(Math.random() * extra.length)];
+    qPool.splice(qIdx + 2, 0, pick.i);
+  }
+}
+
+function nextQ() { qIdx++; renderQ(); }
+
+async function showResult() {
+  show('s-result');
+  const total = qPool.length;
+  const pct = Math.round(score / total * 100);
+  document.getElementById('res-name').textContent = `${studentName} — ${score} of ${total} correct (${pct}%)`;
+  await saveResult(pct, total);
+  renderResultBreakdown();
+}
+
+async function saveResult(pct, total) {
+  if (!supabase) return;
+  try {
+    await supabase.from('quiz_results').insert({
+      student_name: studentName,
+      score_pct: pct,
+      questions_answered: total,
+      rule_stats: ruleStats
+    });
+  } catch (e) { console.warn('Save failed:', e); }
+}
+
+function renderResultBreakdown() {
+  const bd = document.getElementById('rule-breakdown'); bd.innerHTML = '';
+  const pt = document.getElementById('practice-tips'); pt.innerHTML = '';
+  let weak = [];
+  Object.entries(ruleStats)
+    .sort((a, b) => {
+      const pa = a[1].total > 0 ? a[1].correct / a[1].total : 1;
+      const pb = b[1].total > 0 ? b[1].correct / b[1].total : 1;
+      return pa - pb;
+    })
+    .forEach(([rk, rs]) => {
+      if (rs.total === 0) return;
+      const pct = Math.round(rs.correct / rs.total * 100);
+      let tagClass = 'tag-green', tagText = 'Mastered';
+      if (pct < 50) { tagClass = 'tag-red'; tagText = 'Needs work'; weak.push(rk); }
+      else if (pct < 75) { tagClass = 'tag-amber'; tagText = 'Practise'; }
+      const mc = pct >= 75 ? '#1D9E75' : pct >= 50 ? '#EF9F27' : '#E24B4A';
+      bd.innerHTML += `<div class="rule-row"><span style="font-size:13px;color:#1a1a18;max-width:55%">${RULES[rk].label}</span><div style="display:flex;align-items:center;gap:10px"><div class="meter"><div class="meter-fill" style="width:${pct}%;background:${mc}"></div></div><span class="tag ${tagClass}">${tagText}</span></div></div>`;
+    });
+  if (weak.length === 0) {
+    pt.innerHTML = `<p style="color:#27500A;font-size:14px">Excellent work! You have mastered all rules.</p>`;
+  } else {
+    weak.forEach(rk => {
+      pt.innerHTML += `<div style="padding:10px 0;border-bottom:1px solid #eee"><p style="font-size:13px;font-weight:600;color:#1a1a18">${RULES[rk].label}</p><p style="font-size:13px;color:#555;margin-top:3px">${RULES[rk].hint}</p><p style="font-size:12px;color:#777;margin-top:3px">${RULES[rk].ex.join(' · ')}</p></div>`;
+    });
+  }
+}
+
+function restartStudent() {
+  initStats(); qPool = buildPool(); qIdx = 0; score = 0;
+  document.getElementById('q-score').textContent = '0';
+  show('s-quiz'); renderQ();
+}
+
+// ─── TEACHER DASHBOARD ────────────────────────────────────────────
+function lpLogin() {
+  const pw = document.getElementById('lp-pw').value.trim();
+  if (pw === 'Mungg74') { show('s-lp'); loadLP(); }
+  else { document.getElementById('pw-err').style.display = 'block'; }
+}
+
+async function loadLP() {
+  if (!supabase) { alert('Supabase not configured.'); return; }
+  try {
+    const { data, error } = await supabase
+      .from('quiz_results')
+      .select('*')
+      .order('completed_at', { ascending: false });
+    if (error) throw error;
+    renderLP(data || []);
+  } catch (e) { console.error(e); alert('Could not load data: ' + e.message); }
+}
+
+function renderLP(rows) {
+  const studentMap = {};
+  rows.forEach(r => {
+    if (!studentMap[r.student_name]) studentMap[r.student_name] = { attempts: 0, bestScore: 0, lastDate: '', ruleAgg: {} };
+    const s = studentMap[r.student_name];
+    s.attempts++;
+    if (r.score_pct > s.bestScore) s.bestScore = r.score_pct;
+    if (!s.lastDate || r.completed_at > s.lastDate) s.lastDate = r.completed_at;
+    Object.entries(r.rule_stats || {}).forEach(([rk, rv]) => {
+      if (!s.ruleAgg[rk]) s.ruleAgg[rk] = { correct: 0, total: 0 };
+      s.ruleAgg[rk].correct += rv.correct || 0;
+      s.ruleAgg[rk].total += rv.total || 0;
+    });
+  });
+
+  const names = Object.keys(studentMap);
+  document.getElementById('lp-total-students').textContent = names.length;
+  if (names.length === 0) {
+    document.getElementById('lp-avg-score').textContent = '–';
+    document.getElementById('lp-hard-rule').textContent = '–';
+    document.getElementById('lp-no-data').style.display = 'block';
+    document.getElementById('lp-class-rules').innerHTML = '<p style="color:#666;font-size:14px">No data yet.</p>';
+    return;
+  }
+  document.getElementById('lp-no-data').style.display = 'none';
+  const avg = Math.round(names.reduce((s, n) => s + studentMap[n].bestScore, 0) / names.length);
+  document.getElementById('lp-avg-score').textContent = avg + '%';
+
+  const rAgg = {};
+  Object.keys(RULES).forEach(r => { rAgg[r] = { c: 0, t: 0 }; });
+  names.forEach(n => {
+    Object.entries(studentMap[n].ruleAgg).forEach(([r, v]) => {
+      if (rAgg[r]) { rAgg[r].c += v.correct; rAgg[r].t += v.total; }
+    });
+  });
+
+  let hardRule = '–', hardPct = 101;
+  Object.entries(rAgg).forEach(([r, v]) => {
+    if (v.t > 0) { const p = v.c / v.t * 100; if (p < hardPct) { hardPct = p; hardRule = RULES[r].label; } }
+  });
+  document.getElementById('lp-hard-rule').textContent = hardRule;
+
+  const cr = document.getElementById('lp-class-rules'); cr.innerHTML = '';
+  Object.entries(rAgg)
+    .sort((a, b) => { const pa = a[1].t > 0 ? a[1].c / a[1].t : 1; const pb = b[1].t > 0 ? b[1].c / b[1].t : 1; return pa - pb; })
+    .forEach(([r, v]) => {
+      if (v.t === 0) return;
+      const p = Math.round(v.c / v.t * 100);
+      const c = p >= 75 ? '#1D9E75' : p >= 50 ? '#EF9F27' : '#E24B4A';
+      cr.innerHTML += `<div class="rule-row"><span style="font-size:13px;color:#1a1a18;max-width:60%">${RULES[r].label}</span><div style="display:flex;align-items:center;gap:10px"><div class="meter" style="width:120px"><div class="meter-fill" style="width:${p}%;background:${c}"></div></div><span style="font-size:13px;font-weight:600;color:${c}">${p}%</span></div></div>`;
+    });
+
+  const tbody = document.getElementById('lp-tbody'); tbody.innerHTML = '';
+  names.sort().forEach(n => {
+    const s = studentMap[n];
+    let wkRule = '–', wkPct = 101;
+    Object.entries(s.ruleAgg).forEach(([r, v]) => { if (v.total > 0) { const p = v.correct / v.total * 100; if (p < wkPct) { wkPct = p; wkRule = RULES[r] ? RULES[r].label.split('(')[0].trim() : r; } } });
+    const date = s.lastDate ? new Date(s.lastDate).toLocaleDateString('de-CH') : '–';
+    const st = s.bestScore >= 75 ? `<span class="tag tag-green">On track</span>` : s.bestScore >= 50 ? `<span class="tag tag-amber">Practise</span>` : `<span class="tag tag-red">Needs help</span>`;
+    tbody.innerHTML += `<tr><td style="font-weight:600">${n}</td><td>${s.attempts}</td><td>${s.bestScore}%</td><td>${date}</td><td style="font-size:12px;color:#555">${wkRule}</td><td>${st}</td></tr>`;
+  });
+
+  const rd = document.getElementById('lp-rules-detail'); rd.innerHTML = '';
+  Object.entries(rAgg)
+    .sort((a, b) => { const pa = a[1].t > 0 ? a[1].c / a[1].t : 1; const pb = b[1].t > 0 ? b[1].c / b[1].t : 1; return pa - pb; })
+    .forEach(([r, v]) => {
+      if (v.t === 0) return;
+      const p = Math.round(v.c / v.t * 100);
+      const c = p >= 75 ? '#1D9E75' : p >= 50 ? '#EF9F27' : '#E24B4A';
+      const struggling = names.filter(n => {
+        const h = studentMap[n].ruleAgg[r];
+        return h && h.total > 0 && (h.correct / h.total * 100) < 50;
+      }).join(', ') || '–';
+      rd.innerHTML += `<div style="padding:12px 0;border-bottom:1px solid #eee"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600;color:#1a1a18">${RULES[r].label}</span><span style="font-size:15px;font-weight:600;color:${c}">${p}%</span></div><p style="font-size:12px;color:#555;margin-top:4px">${RULES[r].hint}</p><p style="font-size:12px;color:#E24B4A;margin-top:3px">Struggling: ${struggling}</p></div>`;
+    });
+}
+
+function lpTab(name, el) {
+  document.querySelectorAll('.lp-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('lp-' + name).style.display = 'block';
+  el.classList.add('active');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  initSupabase(SB_URL, SB_KEY);
+  show('s-login');
+});
+</script>
+</body>
+</html>
